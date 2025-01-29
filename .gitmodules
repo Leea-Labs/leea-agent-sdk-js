@@ -1,0 +1,3 @@
+[submodule "leea-agent-protocol"]
+	path = leea-agent-protocol
+	url = git@github.com:Leea-Labs/leea-agent-protocol.git
