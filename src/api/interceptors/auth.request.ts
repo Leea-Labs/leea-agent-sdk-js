@@ -7,7 +7,6 @@ class AuthRequestInterceptor {
   }
 
   private onFulfilled(tokenStorage: ValueContainer<string>, config: InternalAxiosRequestConfig) {
-    console.log(config)
     const token = tokenStorage.get()
     if (token) {
       config.headers['Authorization'] = `bearer ${token}`
