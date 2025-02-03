@@ -14,12 +14,12 @@ import {tasksQueue} from './services/tasks-queue'
 import path from 'path'
 
 export class LeeaAgent {
-  private readonly transport = new WebSocketClient()
-  private readonly authStorage = new ValueContainer<string>()
+  private transport: WebSocketClient
+  private readonly authStorage = new ValueContainer()
   private readonly apiClient = getApi(this.authStorage)
 
   constructor(initData: InitData) {
-    this.transport.connect(initData.apiToken, this.buildHello(initData))
+    this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
     this.authStorage.set(initData.apiToken)
     assignHandler(initData.requestHandler)
   }
@@ -27,7 +27,6 @@ export class LeeaAgent {
   private buildHello(initData: InitData): AgentHello {
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
     const secret = require(fullPath)
-    console.log(secret)
     if (!secret) {
       throw new Error(`No secret found at ${fullPath}`)
     }

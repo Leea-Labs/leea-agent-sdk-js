@@ -4,7 +4,7 @@ import {authResponseInterceptor} from '../interceptors/auth.response'
 import {appConfig} from '../../services/config'
 import {ValueContainer} from '../../services/value-container'
 
-export const getHttpClient = (tokenStorage: ValueContainer<string>) => {
+export const getHttpClient = (tokenStorage: ValueContainer) => {
   const httpClient = Axios.create({
     baseURL: appConfig.LEEA_API_URL,
     timeout: 20000,
