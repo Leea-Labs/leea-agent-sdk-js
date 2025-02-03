@@ -2,11 +2,11 @@ import type {Axios, InternalAxiosRequestConfig} from 'axios'
 import {ValueContainer} from '../../services/value-container'
 
 class AuthRequestInterceptor {
-  activate(instance: Axios, tokenStorage: ValueContainer<string>) {
+  activate(instance: Axios, tokenStorage: ValueContainer) {
     instance.interceptors.request.use(this.onFulfilled.bind(null, tokenStorage), this.onRejected)
   }
 
-  private onFulfilled(tokenStorage: ValueContainer<string>, config: InternalAxiosRequestConfig) {
+  private onFulfilled(tokenStorage: ValueContainer, config: InternalAxiosRequestConfig) {
     const token = tokenStorage.get()
     if (token) {
       config.headers['Authorization'] = `bearer ${token}`

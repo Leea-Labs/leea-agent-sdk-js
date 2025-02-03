@@ -1,13 +1,17 @@
 {
-  "name": "leea-agent-js-sdk",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "@leealabs/agent-js-sdk",
+  "version": "1.0.2",
+  "description": "Buenos dias!",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -L ./example/index.ts",
-    "build": "rm -rf dist && mkdir dist && tsc -p ."
+    "build": "rm -rf dist && mkdir dist && tsc -p .",
+    "prepublishOnly": "npm run build"
   },
+  "files": [
+    "dist"
+  ],
   "author": "f@leealabs.com",
   "license": "ISC",
   "devDependencies": {
@@ -27,5 +31,20 @@
     "ws": "^8.18.0",
     "zod": "^3.24.1",
     "zod-to-json-schema": "^3.24.1"
+  },
+  "types": "./dist/index.d.ts",
+  "directories": {
+    "example": "example"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Leea-Labs/agent-js-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Leea-Labs/agent-js-sdk/issues"
+  },
+  "homepage": "https://github.com/Leea-Labs/agent-js-sdk#readme",
+  "publishConfig": {
+    "access": "public"
   }
 }

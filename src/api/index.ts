@@ -3,7 +3,7 @@ import {getHttpClient} from './core/http-client'
 import {AgentsGet} from './get'
 import {AgentsList} from './list'
 
-export const getApi = (tokenStorage: ValueContainer<string>) => {
+export const getApi = (tokenStorage: ValueContainer) => {
   const httpClient = getHttpClient(tokenStorage)
   return {
     list: new AgentsList(httpClient).perform,
