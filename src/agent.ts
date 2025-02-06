@@ -36,6 +36,7 @@ export class LeeaAgent {
     this.solanaConnection = new Connection(clusterApiUrl("devnet"), "confirmed");
     this.name = initData.name;
     this.fee = new anchor.BN(initData.fee)
+    this.registerAgent();
     this.authStorage.set(initData.apiToken)
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
     assignHandler(initData.requestHandler)
@@ -52,20 +53,52 @@ export class LeeaAgent {
     }
   }
 
-  private async registerAgent(): Promise<string> {
+  private registerAgent() {
     const connection = this.solanaConnection;
     const program = new Program(idl as LeeaAgentRegistry, {
       connection,
     });
-    // Send transaction to solana program
-    const transactionSignature = await program.methods
-      .registerAgent(this.name, this.fee)
-      .accounts({
-        holder: this.solanaKey.publicKey
+    const confirm = async (signature: string): Promise<string> => {
+      const block = await connection.getLatestBlockhash();
+      await connection.confirmTransaction({
+        signature,
+        ...block,
+      });
+      return signature;
+    };
+
+    const log = async (signature: string): Promise<string> => {
+      console.log(
+        `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
+      );
+      return signature;
+    };
+    // Check if already registered
+    const [agent] = anchor.web3.PublicKey.findProgramAddressSync(
+      [Buffer.from("leea_agent"), this.solanaKey.publicKey.toBuffer()],
+      program.programId
+    );
+    program.account.agentAccount.fetch(agent)
+      .then((agentData) => {
+        console.log(`Agent already registered at leea program: ${agentData}`)
+        return true;
       })
-      .signers([this.solanaKey])
-      .rpc();
-    return transactionSignature;
+      .catch((err) => {
+        console.log(`Agent not registered at leea program: ${err}, trying to register...`)
+        return false;
+      }).then((ok) => {
+        if (!ok) {
+          program.methods
+            .registerAgent(this.name, this.fee)
+            .accounts({
+              holder: this.solanaKey.publicKey
+            })
+            .signers([this.solanaKey])
+            .rpc()
+            .then(confirm)
+            .then(log)
+        }
+      })
   }
 
   async getAgentsList() {
