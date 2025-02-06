@@ -16,6 +16,7 @@ import type { LeeaAgentRegistry } from "../leea-contracts/contracts/solana/targe
 import idl from "../leea-contracts/contracts/solana/target/idl/leea_agent_registry.json";
 import * as anchor from "@coral-xyz/anchor";
 import { Program, BN } from "@coral-xyz/anchor";
+import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 
 export class LeeaAgent {
   private transport: WebSocketClient
@@ -55,9 +56,12 @@ export class LeeaAgent {
 
   private registerAgent() {
     const connection = this.solanaConnection;
-    const program = new Program(idl as LeeaAgentRegistry, {
-      connection,
+    const wallet = new NodeWallet(this.solanaKey);
+    const provider = new anchor.AnchorProvider(connection, wallet, {
+      commitment: "processed",
     });
+    anchor.setProvider(provider);
+    const program = new Program(idl as LeeaAgentRegistry, provider);
     const confirm = async (signature: string): Promise<string> => {
       const block = await connection.getLatestBlockhash();
       await connection.confirmTransaction({
@@ -80,7 +84,7 @@ export class LeeaAgent {
     );
     program.account.agentAccount.fetch(agent)
       .then((agentData) => {
-        console.log(`Agent already registered at leea program: ${agentData}`)
+        console.log(`Agent already registered at leea program: ${agentData.agentName}`)
         return true;
       })
       .catch((err) => {
