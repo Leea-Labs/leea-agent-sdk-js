@@ -7,23 +7,31 @@ import {appConfig} from '../services/config'
 
 export class WebSocketClient {
   private socket: WebSocket | null = null
-  private url: string = appConfig.LEEA_WS_URL
-  private authAwait: AuthAwait = {
+  private readonly url: string = appConfig.LEEA_WS_URL
+  private readonly authAwait: AuthAwait = {
     promise: null,
     resolve: null,
   }
+  private readonly maxRetries = 20
+  private readonly reconnectDelay = 1000
+  private reconnectAttempts = 0
 
-  public connect(token: string, helloData: AgentHello) {
+  constructor(private readonly token: string, private readonly helloData: AgentHello) {
+    this.connect()
+  }
+
+  public connect() {
     this.authAwait.promise = new Promise<boolean>((r) => (this.authAwait.resolve = r))
     this.socket = new WebSocket(this.url, {
       headers: {
-        authorization: `Bearer ${token}`,
+        authorization: `Bearer ${this.token}`,
       },
     })
 
     this.socket.onopen = () => {
+      this.reconnectAttempts = 0
       console.log('Connection established')
-      const helloMsg = AgentHello.create(helloData)
+      const helloMsg = AgentHello.create(this.helloData)
       this.sendMessage(helloMsg, true)
     }
 
@@ -31,13 +39,27 @@ export class WebSocketClient {
       this.handleMessage(event.data as ArrayBuffer)
     }
 
-    this.socket.onerror = (error) => {
-      console.error('WebSocket error:', error)
+    this.socket.onerror = (event) => {
+      console.error(`Leea connection error: ${event.error?.code}`)
     }
 
     this.socket.onclose = (event) => {
       console.log('WebSocket connection closed.', event.code, event.reason)
+      this.reconnect()
     }
+  }
+
+  private reconnect() {
+    if (this.reconnectAttempts >= this.maxRetries) {
+      throw new Error('Max reconnect attempts reached')
+    }
+
+    const delay = this.reconnectDelay * ++this.reconnectAttempts
+
+    setTimeout(() => {
+      console.log(`Reconnecting... Attempt ${this.reconnectAttempts}`)
+      this.connect()
+    }, delay)
   }
 
   public disconnect = () => {
