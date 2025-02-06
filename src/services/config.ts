@@ -35,8 +35,8 @@ class AppConfig {
 }
 
 const configInstance = new AppConfig({
-  LEEA_API_URL: 'http://localhost:1209',
-  LEEA_WS_URL: 'ws://localhost:1211/api/v1/connect',
+  LEEA_API_URL: 'https://api.leealabs.com',
+  LEEA_WS_URL: 'wss://api.leealabs.com/api/v1/connect',
 })
 
 export const appConfig = configInstance.value
