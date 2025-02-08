@@ -1,5 +1,5 @@
-import {z} from 'zod'
-import {LeeaAgent, RequestHandler} from '../src/'
+import { z } from 'zod'
+import { LeeaAgent, RequestHandler } from '../src/'
 
 const requestHandler: RequestHandler = (payload) => {
   return new Promise<string>((resolve) => {
@@ -10,6 +10,7 @@ const requestHandler: RequestHandler = (payload) => {
 export const main = async () => {
   const agent = new LeeaAgent({
     name: 'example_name',
+    fee: 100,
     description: 'example_desc',
     inputSchema: z.string(),
     outputSchema: z.string(),
