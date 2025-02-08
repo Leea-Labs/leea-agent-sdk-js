@@ -1,44 +1,71 @@
-import {AgentHello, ExecutionRequest} from './protocol/protocol'
-import {WebSocketClient} from './transport/sockets'
-import {InitData} from './types/init'
+import { AgentHello, ExecutionRequest } from './protocol/protocol'
+import { WebSocketClient } from './transport/sockets'
+import { InitData } from './types/init'
 import zodToJson from 'zod-to-json-schema'
-import {Keypair} from '@solana/web3.js'
+import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import nacl from 'tweetnacl'
-import {decodeUTF8} from 'tweetnacl-util'
+import { decodeUTF8 } from 'tweetnacl-util'
 import bs58 from 'bs58'
-import {ValueContainer} from './services/value-container'
-import {getApi} from './api'
-import {v4 as uuid} from 'uuid'
-import {assignHandler} from './transport/handlers/routes'
-import {tasksQueue} from './services/tasks-queue'
+import { ValueContainer } from './services/value-container'
+import { getApi } from './api'
+import { v4 as uuid } from 'uuid'
+import { assignHandler } from './transport/handlers/routes'
+import { tasksQueue } from './services/tasks-queue'
 import path from 'path'
+import type { LeeaAgentRegistry } from "./solana/target/types/leea_agent_registry";
+import idl from "./solana/target/idl/leea_agent_registry.json";
+import * as anchor from "@coral-xyz/anchor";
+import { Program, BN } from "@coral-xyz/anchor";
 
 export class LeeaAgent {
   private transport: WebSocketClient
   private readonly authStorage = new ValueContainer()
   private readonly apiClient = getApi(this.authStorage)
+  private solanaConnection: Connection
+  private solanaKey: Keypair
+  private name: string
+  private fee: BN
 
   constructor(initData: InitData) {
-    this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
-    this.authStorage.set(initData.apiToken)
-    assignHandler(initData.requestHandler)
-  }
-
-  private buildHello(initData: InitData): AgentHello {
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
     const secret = require(fullPath)
     if (!secret) {
       throw new Error(`No secret found at ${fullPath}`)
     }
-    const {secretKey, publicKey} = Keypair.fromSecretKey(new Uint8Array(secret))
+    this.solanaKey = Keypair.fromSecretKey(new Uint8Array(secret))
+    this.solanaConnection = new Connection(clusterApiUrl("devnet"), "confirmed");
+    this.name = initData.name;
+    this.fee = new anchor.BN(initData.fee)
+    this.authStorage.set(initData.apiToken)
+    this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
+    assignHandler(initData.requestHandler)
+  }
+
+  private buildHello(initData: InitData): AgentHello {
     return {
       name: initData.name,
       description: initData.description,
       inputSchema: JSON.stringify(zodToJson(initData.inputSchema), null, 2),
       outputSchema: JSON.stringify(zodToJson(initData.outputSchema), null, 2),
-      publicKey: publicKey.toBase58(),
-      signature: bs58.encode(nacl.sign.detached(decodeUTF8(initData.name), secretKey)),
+      publicKey: this.solanaKey.publicKey.toBase58(),
+      signature: bs58.encode(nacl.sign.detached(decodeUTF8(this.name), this.solanaKey.secretKey)),
     }
+  }
+
+  private async registerAgent(): Promise<string> {
+    const connection = this.solanaConnection;
+    const program = new Program(idl as LeeaAgentRegistry, {
+      connection,
+    });
+    // Send transaction to solana program
+    const transactionSignature = await program.methods
+      .registerAgent(this.name, this.fee)
+      .accounts({
+        holder: this.solanaKey.publicKey
+      })
+      .signers([this.solanaKey])
+      .rpc();
+    return transactionSignature;
   }
 
   async getAgentsList() {
