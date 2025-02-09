@@ -11,4 +11,7 @@ export type InitData = {
   apiToken: string
   secretPath: string
   requestHandler: RequestHandler
+  displayName: string
+  visibility?: 'public' | 'private'
+  avatarPath?: string
 }

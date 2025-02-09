@@ -1,4 +1,4 @@
-import {AgentHello, ExecutionRequest} from './protocol/protocol'
+import {AgentHello, AgentHello_AgentVisibility, ExecutionRequest} from './protocol/protocol'
 import {WebSocketClient} from './transport/sockets'
 import {InitData} from './types/init'
 import zodToJson from 'zod-to-json-schema'
@@ -12,11 +12,16 @@ import {v4 as uuid} from 'uuid'
 import {assignHandler} from './transport/handlers/routes'
 import {tasksQueue} from './services/tasks-queue'
 import path from 'path'
+import {imageReader} from './services/image-reader'
 
 export class LeeaAgent {
   private transport: WebSocketClient
   private readonly authStorage = new ValueContainer()
   private readonly apiClient = getApi(this.authStorage)
+  private visibilityMap = {
+    public: AgentHello_AgentVisibility.public,
+    private: AgentHello_AgentVisibility.private,
+  }
 
   constructor(initData: InitData) {
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
@@ -38,6 +43,9 @@ export class LeeaAgent {
       outputSchema: JSON.stringify(zodToJson(initData.outputSchema), null, 2),
       publicKey: publicKey.toBase58(),
       signature: bs58.encode(nacl.sign.detached(decodeUTF8(initData.name), secretKey)),
+      visibility: initData.visibility ? this.visibilityMap[initData.visibility] : AgentHello_AgentVisibility.public,
+      displayName: initData.displayName,
+      avatar: initData.avatarPath ? imageReader.get(initData.avatarPath) : undefined,
     }
   }
 

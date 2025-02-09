@@ -80,6 +80,31 @@ export interface AgentHello {
      * @generated from protobuf field: string Signature = 6 [json_name = "Signature"];
      */
     signature: string;
+    /**
+     * @generated from protobuf field: leea_agent_protocol.AgentHello.AgentVisibility Visibility = 7 [json_name = "Visibility"];
+     */
+    visibility: AgentHello_AgentVisibility;
+    /**
+     * @generated from protobuf field: string DisplayName = 8 [json_name = "DisplayName"];
+     */
+    displayName: string;
+    /**
+     * @generated from protobuf field: optional bytes Avatar = 9 [json_name = "Avatar"];
+     */
+    avatar?: Uint8Array;
+}
+/**
+ * @generated from protobuf enum leea_agent_protocol.AgentHello.AgentVisibility
+ */
+export enum AgentHello_AgentVisibility {
+    /**
+     * @generated from protobuf enum value: public = 0;
+     */
+    public = 0,
+    /**
+     * @generated from protobuf enum value: private = 1;
+     */
+    private = 1
 }
 /**
  * @generated from protobuf message leea_agent_protocol.ServerHello
@@ -210,7 +235,10 @@ class AgentHello$Type extends MessageType<AgentHello> {
             { no: 3, name: "InputSchema", kind: "scalar", jsonName: "InputSchema", T: 9 /*ScalarType.STRING*/ },
             { no: 4, name: "OutputSchema", kind: "scalar", jsonName: "OutputSchema", T: 9 /*ScalarType.STRING*/ },
             { no: 5, name: "PublicKey", kind: "scalar", jsonName: "PublicKey", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "Signature", kind: "scalar", jsonName: "Signature", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "Signature", kind: "scalar", jsonName: "Signature", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "Visibility", kind: "enum", jsonName: "Visibility", T: () => ["leea_agent_protocol.AgentHello.AgentVisibility", AgentHello_AgentVisibility] },
+            { no: 8, name: "DisplayName", kind: "scalar", jsonName: "DisplayName", T: 9 /*ScalarType.STRING*/ },
+            { no: 9, name: "Avatar", kind: "scalar", jsonName: "Avatar", opt: true, T: 12 /*ScalarType.BYTES*/ }
         ]);
     }
     create(value?: PartialMessage<AgentHello>): AgentHello {
@@ -221,6 +249,8 @@ class AgentHello$Type extends MessageType<AgentHello> {
         message.outputSchema = "";
         message.publicKey = "";
         message.signature = "";
+        message.visibility = 0;
+        message.displayName = "";
         if (value !== undefined)
             reflectionMergePartial<AgentHello>(this, message, value);
         return message;
@@ -247,6 +277,15 @@ class AgentHello$Type extends MessageType<AgentHello> {
                     break;
                 case /* string Signature = 6 [json_name = "Signature"];*/ 6:
                     message.signature = reader.string();
+                    break;
+                case /* leea_agent_protocol.AgentHello.AgentVisibility Visibility = 7 [json_name = "Visibility"];*/ 7:
+                    message.visibility = reader.int32();
+                    break;
+                case /* string DisplayName = 8 [json_name = "DisplayName"];*/ 8:
+                    message.displayName = reader.string();
+                    break;
+                case /* optional bytes Avatar = 9 [json_name = "Avatar"];*/ 9:
+                    message.avatar = reader.bytes();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -278,6 +317,15 @@ class AgentHello$Type extends MessageType<AgentHello> {
         /* string Signature = 6 [json_name = "Signature"]; */
         if (message.signature !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.signature);
+        /* leea_agent_protocol.AgentHello.AgentVisibility Visibility = 7 [json_name = "Visibility"]; */
+        if (message.visibility !== 0)
+            writer.tag(7, WireType.Varint).int32(message.visibility);
+        /* string DisplayName = 8 [json_name = "DisplayName"]; */
+        if (message.displayName !== "")
+            writer.tag(8, WireType.LengthDelimited).string(message.displayName);
+        /* optional bytes Avatar = 9 [json_name = "Avatar"]; */
+        if (message.avatar !== undefined)
+            writer.tag(9, WireType.LengthDelimited).bytes(message.avatar);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
