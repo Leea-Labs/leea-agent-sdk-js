@@ -16,6 +16,9 @@ export const main = async () => {
     secretPath: './example/id.json',
     apiToken: '391320f6-8584-4655-a0f7-3d64545b0721',
     requestHandler,
+    visibility: 'private',
+    displayName: 'My Example name',
+    avatarPath: './example/avatar.png',
   })
 
   const someA = await agent.getAgent('abc/example_name')
