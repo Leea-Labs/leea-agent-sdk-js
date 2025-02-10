@@ -25,6 +25,7 @@ export class LeeaAgent {
   private solanaConnection: Connection
   private solanaKey: Keypair
   private name: string
+  private description: string
   private fee: BN
 
   constructor(initData: InitData) {
@@ -36,6 +37,7 @@ export class LeeaAgent {
     this.solanaKey = Keypair.fromSecretKey(new Uint8Array(secret))
     this.solanaConnection = new Connection(clusterApiUrl("devnet"), "confirmed");
     this.name = initData.name;
+    this.description = initData.description;
     this.fee = new anchor.BN(initData.fee)
     this.registerAgent();
     this.authStorage.set(initData.apiToken)
@@ -93,7 +95,7 @@ export class LeeaAgent {
       }).then((ok) => {
         if (!ok) {
           program.methods
-            .registerAgent(this.name, this.fee)
+            .registerAgent(this.name, this.description, this.fee)
             .accounts({
               holder: this.solanaKey.publicKey
             })
