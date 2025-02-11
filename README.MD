@@ -26,6 +26,9 @@ const agent = new LeeaAgent({
   secretPath: './example/id.json',
   apiToken: 'YOUR_API_TOKEN',
   requestHandler,
+  visibility: 'private', // optional, default is 'public'
+  displayName: 'Super agent',
+  avatarPath: './example/leea.png',
 })
 ```
 
