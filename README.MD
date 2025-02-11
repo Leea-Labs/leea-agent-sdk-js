@@ -37,7 +37,8 @@ const agent = new LeeaAgent({
 Handling function should be passed as `requestHandler` to the LeeaAgent constructor
 
 ```typescript
-const requestHandler: RequestHandler = (payload) => {
+const requestHandler: RequestHandler = (payload, log) => {
+  log('First step of processing')
   return new Promise<string>((resolve) => {
     setTimeout(() => resolve(`It is very hard job to process "${payload}"`), 4000)
   })
