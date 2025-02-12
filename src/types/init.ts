@@ -1,10 +1,12 @@
 import {type Schema} from 'zod'
-import {ExecutionRequest} from '../protocol/protocol'
 
-export type RequestHandler = (
-  msg: ExecutionRequest['input'],
-  log: (message: string) => void
-) => string | Promise<string>
+export type RequestHandler = (context: ExecutionContext, data: any) => string | Promise<string>
+
+export type ExecutionContext = {
+  sessionId: string
+  parentId?: string
+  requestId: string
+}
 
 export type InitData = {
   name: string

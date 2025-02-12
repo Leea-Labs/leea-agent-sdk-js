@@ -1,6 +1,6 @@
-import {AgentHello, AgentHello_AgentVisibility, ExecutionRequest} from './protocol/protocol'
+import {AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest} from './protocol/protocol'
 import {WebSocketClient} from './transport/sockets'
-import {InitData} from './types/init'
+import {ExecutionContext, InitData} from './types/init'
 import zodToJson from 'zod-to-json-schema'
 import {Keypair} from '@solana/web3.js'
 import nacl from 'tweetnacl'
@@ -61,14 +61,24 @@ export class LeeaAgent {
     })
   }
 
-  callAgent(agentID: string, input: string) {
+  callAgent(agentID, input: string, сontext: ExecutionContext) {
     const request = ExecutionRequest.create({
       requestID: uuid(),
+      sessionID: сontext.sessionId,
+      parentID: сontext.requestId,
       agentID,
       input,
     })
 
     this.transport.sendMessage(request)
     return tasksQueue.add(request.requestID)
+  }
+
+  log(message: string, requestId: string) {
+    const log = ExecutionLog.create({
+      requestID: requestId,
+      message,
+    })
+    this.transport.sendMessage(log)
   }
 }
