@@ -1,6 +1,6 @@
-import { AgentHello, ExecutionRequest } from './protocol/protocol'
-import { WebSocketClient } from './transport/sockets'
-import { InitData } from './types/init'
+import {AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest} from './protocol/protocol'
+import {WebSocketClient} from './transport/sockets'
+import {ExecutionContext, InitData} from './types/init'
 import zodToJson from 'zod-to-json-schema'
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import nacl from 'tweetnacl'
@@ -17,6 +17,7 @@ import idl from "../leea-contracts/contracts/solana/target/idl/leea_agent_regist
 import * as anchor from "@coral-xyz/anchor";
 import { Program, BN } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
+import {imageReader} from './services/image-reader'
 
 export class LeeaAgent {
   private transport: WebSocketClient
@@ -27,6 +28,10 @@ export class LeeaAgent {
   private name: string
   private description: string
   private fee: BN
+  private visibilityMap = {
+    public: AgentHello_AgentVisibility.public,
+    private: AgentHello_AgentVisibility.private,
+  }
 
   constructor(initData: InitData) {
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
@@ -52,7 +57,10 @@ export class LeeaAgent {
       inputSchema: JSON.stringify(zodToJson(initData.inputSchema), null, 2),
       outputSchema: JSON.stringify(zodToJson(initData.outputSchema), null, 2),
       publicKey: this.solanaKey.publicKey.toBase58(),
-      signature: bs58.encode(nacl.sign.detached(decodeUTF8(this.name), this.solanaKey.secretKey)),
+      signature: bs58.encode(nacl.sign.detached(decodeUTF8(initData.name), this.solanaKey.secretKey)),
+      visibility: initData.visibility ? this.visibilityMap[initData.visibility] : AgentHello_AgentVisibility.public,
+      displayName: initData.displayName,
+      avatar: initData.avatarPath ? imageReader.get(initData.avatarPath) : undefined,
     }
   }
 
@@ -119,14 +127,24 @@ export class LeeaAgent {
     })
   }
 
-  callAgent(agentID: string, input: string) {
+  callAgent(agentID, input: string, сontext: ExecutionContext) {
     const request = ExecutionRequest.create({
       requestID: uuid(),
+      sessionID: сontext.sessionId,
+      parentID: сontext.requestId,
       agentID,
       input,
     })
 
     this.transport.sendMessage(request)
     return tasksQueue.add(request.requestID)
+  }
+
+  log(message: string, requestId: string) {
+    const log = ExecutionLog.create({
+      requestID: requestId,
+      message,
+    })
+    this.transport.sendMessage(log)
   }
 }

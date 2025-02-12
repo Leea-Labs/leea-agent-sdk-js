@@ -3,7 +3,8 @@ import * as protocol from '../protocol/protocol'
 class ProtocolService {
   public pack<T extends object>(message: T): ArrayBuffer {
     for (const [msgName, msgType] of Object.entries(protocol)) {
-      if (msgName == 'Envelope_MessageType') {
+      // @ts-ignore
+      if (!msgType.typeName?.startsWith('leea_agent_protocol')) {
         continue
       }
       // @ts-ignore
