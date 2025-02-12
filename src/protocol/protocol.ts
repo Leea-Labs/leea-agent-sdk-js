@@ -123,21 +123,33 @@ export interface Error {
      * @generated from protobuf field: string Message = 2 [json_name = "Message"];
      */
     message: string;
+    /**
+     * @generated from protobuf field: string ErrorCode = 3 [json_name = "ErrorCode"];
+     */
+    errorCode: string;
 }
 /**
  * @generated from protobuf message leea_agent_protocol.ExecutionRequest
  */
 export interface ExecutionRequest {
     /**
-     * @generated from protobuf field: string RequestID = 1 [json_name = "RequestID"];
+     * @generated from protobuf field: string SessionID = 1 [json_name = "SessionID"];
+     */
+    sessionID: string;
+    /**
+     * @generated from protobuf field: string RequestID = 2 [json_name = "RequestID"];
      */
     requestID: string;
     /**
-     * @generated from protobuf field: string AgentID = 2 [json_name = "AgentID"];
+     * @generated from protobuf field: optional string ParentID = 3 [json_name = "ParentID"];
+     */
+    parentID?: string;
+    /**
+     * @generated from protobuf field: string AgentID = 4 [json_name = "AgentID"];
      */
     agentID: string; // Agent that should be triggered
     /**
-     * @generated from protobuf field: string Input = 3 [json_name = "Input"];
+     * @generated from protobuf field: string Input = 5 [json_name = "Input"];
      */
     input: string; // Should follow agent input schema
 }
@@ -366,13 +378,15 @@ class Error$Type extends MessageType<Error> {
     constructor() {
         super("leea_agent_protocol.Error", [
             { no: 1, name: "RequestID", kind: "scalar", jsonName: "RequestID", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "Message", kind: "scalar", jsonName: "Message", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "Message", kind: "scalar", jsonName: "Message", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "ErrorCode", kind: "scalar", jsonName: "ErrorCode", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<Error>): Error {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.requestID = "";
         message.message = "";
+        message.errorCode = "";
         if (value !== undefined)
             reflectionMergePartial<Error>(this, message, value);
         return message;
@@ -387,6 +401,9 @@ class Error$Type extends MessageType<Error> {
                     break;
                 case /* string Message = 2 [json_name = "Message"];*/ 2:
                     message.message = reader.string();
+                    break;
+                case /* string ErrorCode = 3 [json_name = "ErrorCode"];*/ 3:
+                    message.errorCode = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -406,6 +423,9 @@ class Error$Type extends MessageType<Error> {
         /* string Message = 2 [json_name = "Message"]; */
         if (message.message !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.message);
+        /* string ErrorCode = 3 [json_name = "ErrorCode"]; */
+        if (message.errorCode !== "")
+            writer.tag(3, WireType.LengthDelimited).string(message.errorCode);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -420,13 +440,16 @@ export const Error = new Error$Type();
 class ExecutionRequest$Type extends MessageType<ExecutionRequest> {
     constructor() {
         super("leea_agent_protocol.ExecutionRequest", [
-            { no: 1, name: "RequestID", kind: "scalar", jsonName: "RequestID", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "AgentID", kind: "scalar", jsonName: "AgentID", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "Input", kind: "scalar", jsonName: "Input", T: 9 /*ScalarType.STRING*/ }
+            { no: 1, name: "SessionID", kind: "scalar", jsonName: "SessionID", T: 9 /*ScalarType.STRING*/ },
+            { no: 2, name: "RequestID", kind: "scalar", jsonName: "RequestID", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "ParentID", kind: "scalar", jsonName: "ParentID", opt: true, T: 9 /*ScalarType.STRING*/ },
+            { no: 4, name: "AgentID", kind: "scalar", jsonName: "AgentID", T: 9 /*ScalarType.STRING*/ },
+            { no: 5, name: "Input", kind: "scalar", jsonName: "Input", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<ExecutionRequest>): ExecutionRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.sessionID = "";
         message.requestID = "";
         message.agentID = "";
         message.input = "";
@@ -439,13 +462,19 @@ class ExecutionRequest$Type extends MessageType<ExecutionRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* string RequestID = 1 [json_name = "RequestID"];*/ 1:
+                case /* string SessionID = 1 [json_name = "SessionID"];*/ 1:
+                    message.sessionID = reader.string();
+                    break;
+                case /* string RequestID = 2 [json_name = "RequestID"];*/ 2:
                     message.requestID = reader.string();
                     break;
-                case /* string AgentID = 2 [json_name = "AgentID"];*/ 2:
+                case /* optional string ParentID = 3 [json_name = "ParentID"];*/ 3:
+                    message.parentID = reader.string();
+                    break;
+                case /* string AgentID = 4 [json_name = "AgentID"];*/ 4:
                     message.agentID = reader.string();
                     break;
-                case /* string Input = 3 [json_name = "Input"];*/ 3:
+                case /* string Input = 5 [json_name = "Input"];*/ 5:
                     message.input = reader.string();
                     break;
                 default:
@@ -460,15 +489,21 @@ class ExecutionRequest$Type extends MessageType<ExecutionRequest> {
         return message;
     }
     internalBinaryWrite(message: ExecutionRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* string RequestID = 1 [json_name = "RequestID"]; */
+        /* string SessionID = 1 [json_name = "SessionID"]; */
+        if (message.sessionID !== "")
+            writer.tag(1, WireType.LengthDelimited).string(message.sessionID);
+        /* string RequestID = 2 [json_name = "RequestID"]; */
         if (message.requestID !== "")
-            writer.tag(1, WireType.LengthDelimited).string(message.requestID);
-        /* string AgentID = 2 [json_name = "AgentID"]; */
+            writer.tag(2, WireType.LengthDelimited).string(message.requestID);
+        /* optional string ParentID = 3 [json_name = "ParentID"]; */
+        if (message.parentID !== undefined)
+            writer.tag(3, WireType.LengthDelimited).string(message.parentID);
+        /* string AgentID = 4 [json_name = "AgentID"]; */
         if (message.agentID !== "")
-            writer.tag(2, WireType.LengthDelimited).string(message.agentID);
-        /* string Input = 3 [json_name = "Input"]; */
+            writer.tag(4, WireType.LengthDelimited).string(message.agentID);
+        /* string Input = 5 [json_name = "Input"]; */
         if (message.input !== "")
-            writer.tag(3, WireType.LengthDelimited).string(message.input);
+            writer.tag(5, WireType.LengthDelimited).string(message.input);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

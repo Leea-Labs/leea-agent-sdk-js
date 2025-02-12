@@ -1,24 +1,24 @@
-import {ExecutionLog, ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
+import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
 import {RequestHandler} from '../../types/init'
 
 export const executionRequestWrapper = async (
-  msg: ExecutionRequest,
-  send: (message: ExecutionResult | ExecutionLog) => void,
+  request: ExecutionRequest,
+  send: (message: ExecutionResult) => void,
   callback: RequestHandler
 ) => {
-  const logFn = (message: string) => {
-    const log = ExecutionLog.create({
-      requestID: msg.requestID,
-      message,
-    })
-
-    send(log)
+  const context = {
+    requestId: request.requestID,
+    parentId: request.parentID,
+    sessionId: request.sessionID,
   }
 
-  const result = await callback(msg.input, logFn)
+  const data = request.input
+
+  const result = await callback(context, data)
+
   send(
     ExecutionResult.create({
-      requestID: msg.requestID,
+      requestID: context.requestId,
       isSuccessful: true,
       result,
     })
