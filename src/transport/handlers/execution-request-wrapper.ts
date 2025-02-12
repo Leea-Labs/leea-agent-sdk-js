@@ -2,14 +2,23 @@ import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
 import {RequestHandler} from '../../types/init'
 
 export const executionRequestWrapper = async (
-  msg: ExecutionRequest,
+  request: ExecutionRequest,
   send: (message: ExecutionResult) => void,
   callback: RequestHandler
 ) => {
-  const result = await callback(msg.input)
+  const context = {
+    requestId: request.requestID,
+    parentId: request.parentID,
+    sessionId: request.sessionID,
+  }
+
+  const data = request.input
+
+  const result = await callback(context, data)
+
   send(
     ExecutionResult.create({
-      requestID: msg.requestID,
+      requestID: context.requestId,
       isSuccessful: true,
       result,
     })
