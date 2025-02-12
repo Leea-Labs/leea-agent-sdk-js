@@ -1,6 +1,6 @@
-import {AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest} from './protocol/protocol'
-import {WebSocketClient} from './transport/sockets'
-import {ExecutionContext, InitData} from './types/init'
+import { AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest } from './protocol/protocol'
+import { WebSocketClient } from './transport/sockets'
+import { ExecutionContext, InitData } from './types/init'
 import zodToJson from 'zod-to-json-schema'
 import { clusterApiUrl, Connection, Keypair } from "@solana/web3.js";
 import nacl from 'tweetnacl'
@@ -17,7 +17,7 @@ import idl from "../leea-contracts/contracts/solana/target/idl/leea_agent_regist
 import * as anchor from "@coral-xyz/anchor";
 import { Program, BN } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import {imageReader} from './services/image-reader'
+import { imageReader } from './services/image-reader'
 
 export class LeeaAgent {
   private transport: WebSocketClient
@@ -33,7 +33,7 @@ export class LeeaAgent {
     private: AgentHello_AgentVisibility.private,
   }
 
-  constructor(initData: InitData) {
+  async initialize(initData: InitData) {
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
     const secret = require(fullPath)
     if (!secret) {
@@ -44,7 +44,7 @@ export class LeeaAgent {
     this.name = initData.name;
     this.description = initData.description;
     this.fee = new anchor.BN(initData.fee)
-    this.registerAgent();
+    await this.registerAgent();
     this.authStorage.set(initData.apiToken)
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
     assignHandler(initData.requestHandler)
@@ -64,7 +64,7 @@ export class LeeaAgent {
     }
   }
 
-  private registerAgent() {
+  private async registerAgent() {
     const connection = this.solanaConnection;
     const wallet = new NodeWallet(this.solanaKey);
     const provider = new anchor.AnchorProvider(connection, wallet, {
@@ -81,38 +81,29 @@ export class LeeaAgent {
       return signature;
     };
 
-    const log = async (signature: string): Promise<string> => {
-      console.log(
-        `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
-      );
-      return signature;
-    };
     // Check if already registered
     const [agent] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from("leea_agent"), this.solanaKey.publicKey.toBuffer()],
       program.programId
     );
-    program.account.agentAccount.fetch(agent)
-      .then((agentData) => {
-        console.log(`Agent already registered at leea program: ${agentData.agentName}`)
-        return true;
-      })
-      .catch((err) => {
-        console.log(`Agent not registered at leea program: ${err}, trying to register...`)
-        return false;
-      }).then((ok) => {
-        if (!ok) {
-          program.methods
-            .registerAgent(this.name, this.description, this.fee)
-            .accounts({
-              holder: this.solanaKey.publicKey
-            })
-            .signers([this.solanaKey])
-            .rpc()
-            .then(confirm)
-            .then(log)
-        }
-      })
+    try {
+      const agentData = await program.account.agentAccount.fetch(agent)
+      console.log(`Agent already registered at leea program: ${agentData.agentName}`)
+    } catch (err) {
+      program.methods
+        .registerAgent(this.name, this.description, this.fee)
+        .accounts({
+          holder: this.solanaKey.publicKey
+        })
+        .signers([this.solanaKey])
+        .rpc()
+        .then(confirm)
+        .then((signature) => {
+          console.log(
+            `Your transaction signature: https://explorer.solana.com/transaction/${signature}?cluster=custom&customUrl=${connection.rpcEndpoint}`
+          );
+        })
+    }
   }
 
   async getAgentsList() {

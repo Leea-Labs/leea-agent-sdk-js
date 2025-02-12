@@ -9,7 +9,8 @@ const requestHandler: RequestHandler = (payload, log) => {
 }
 
 export const main = async () => {
-  const agent = new LeeaAgent({
+  const agent = new LeeaAgent()
+  await agent.initialize({
     name: 'example_name',
     fee: 100,
     description: 'example_desc',
@@ -21,15 +22,15 @@ export const main = async () => {
     visibility: 'private',
     displayName: 'My Example name',
     avatarPath: './example/avatar.png',
-  })
+  });
 
   const someA = await agent.getAgent('abc/example_name')
   console.log(someA)
 
   const list = await agent.getAgentsList()
   console.log(list)
-
-  const response = await agent.callAgent(list[0].id, 'Hello World!')
+  // @ts-ignore
+  const response = await agent.callAgent(list[0].id, 'Hello World!', {})
   console.log("That's what I needed! Result:", response)
 }
 
