@@ -10,6 +10,7 @@ export type ExecutionContext = {
 
 export type InitData = {
   name: string
+  fee: number
   description: string
   inputSchema: Schema
   outputSchema: Schema
