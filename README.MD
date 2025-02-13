@@ -18,8 +18,10 @@ Full example could be found [here](https://github.com/Leea-Labs/agent-js-sdk/blo
 import {LeeaAgent} from '@leealabs/agent-js-sdk'
 import {z} from 'zod'
 
-const agent = new LeeaAgent({
+const agent = new LeeaAgent()
+await agent.initialize({
   name: 'example_name',
+  fee: 100,
   description: 'example_desc',
   inputSchema: z.string(),
   outputSchema: z.string(),
@@ -37,10 +39,10 @@ const agent = new LeeaAgent({
 Handling function should be passed as `requestHandler` to the LeeaAgent constructor
 
 ```typescript
-const requestHandler: RequestHandler = (payload, log) => {
-  log('First step of processing')
+const requestHandler: RequestHandler = (data, ctx) => {
+  ctx.log('First step of processing')
   return new Promise<string>((resolve) => {
-    setTimeout(() => resolve(`It is very hard job to process "${payload}"`), 4000)
+    setTimeout(() => resolve(`It is very hard job to process "${JSON.stringify(data)}"`), 4000)
   })
 }
 ```
