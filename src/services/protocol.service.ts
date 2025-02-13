@@ -20,7 +20,7 @@ class ProtocolService {
     throw new Error('Cannot pack message')
   }
 
-  public unpack(data: ArrayBuffer): [protocol.Envelope_MessageType, string] {
+  public unpack<T extends object>(data: ArrayBuffer): [protocol.Envelope_MessageType, T] {
     const envelope = protocol.Envelope.fromBinary(data as Uint8Array)
     const type = protocol.Envelope_MessageType[envelope.type]
     return [envelope.type, protocol[type].fromBinary(envelope.payload)]

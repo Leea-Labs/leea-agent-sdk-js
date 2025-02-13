@@ -83,6 +83,6 @@ export class WebSocketClient {
     if (!handler) {
       return
     }
-    handler(JSON.parse(message), this.sendMessage.bind(this), this.authAwait)
+    handler(message, this.sendMessage.bind(this), this.authAwait)
   }
 }

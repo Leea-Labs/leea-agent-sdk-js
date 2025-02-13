@@ -12,7 +12,7 @@ export const executionRequestWrapper = async (
     sessionId: request.sessionID,
   }
 
-  const data = request.input
+  const data = typeof request.input === 'string' ? JSON.parse(request.input) : request.input
 
   const result = await callback(context, data)
 
