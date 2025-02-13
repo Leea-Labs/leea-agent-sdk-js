@@ -1,10 +1,10 @@
-import { z } from 'zod'
-import { LeeaAgent, RequestHandler } from '../src/'
+import {z} from 'zod'
+import {LeeaAgent, RequestHandler} from '../src/'
 
-const requestHandler: RequestHandler = (payload, log) => {
-  log('First step of processing')
+const requestHandler: RequestHandler = (data, ctx) => {
+  ctx.log('First step of processing')
   return new Promise<string>((resolve) => {
-    setTimeout(() => resolve(`It is very hard job to process "${payload}"`), 4000)
+    setTimeout(() => resolve(`It is very hard job to process "${JSON.stringify(data)}"`), 4000)
   })
 }
 
@@ -22,15 +22,20 @@ export const main = async () => {
     visibility: 'private',
     displayName: 'My Example name',
     avatarPath: './example/avatar.png',
-  });
+  })
 
-  const someA = await agent.getAgent('abc/example_name')
+  const someA = await agent.getAgent('abc/twitter')
   console.log(someA)
 
   const list = await agent.getAgentsList()
   console.log(list)
-  // @ts-ignore
-  const response = await agent.callAgent(list[0].id, 'Hello World!', {})
+
+  const payload = {
+    profilesToFind: 'Top 100 AI influencers',
+    summarizer: 'Define what is trending and predict future. Create post for X',
+  }
+
+  const response = await agent.callAgent(someA.id, payload)
   console.log("That's what I needed! Result:", response)
 }
 

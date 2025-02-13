@@ -50,7 +50,7 @@ export class LeeaAgent {
     await this.registerAgent()
     this.authStorage.set(initData.apiToken)
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
-    assignHandler(initData.requestHandler)
+    assignHandler(this, initData.requestHandler)
   }
 
   private buildHello(initData: InitData): AgentHello {
@@ -120,11 +120,11 @@ export class LeeaAgent {
     })
   }
 
-  callAgent(agentID, input: string, сontext: ExecutionContext) {
+  callAgent<T = any>(agentID: string, input: T, сontext?: ExecutionContext) {
     const request = ExecutionRequest.create({
       requestID: uuid(),
-      sessionID: сontext.sessionId,
-      parentID: сontext.requestId,
+      sessionID: сontext?.sessionId,
+      parentID: сontext?.requestId,
       agentID,
       input: JSON.stringify(input),
     })
