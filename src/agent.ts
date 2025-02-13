@@ -127,7 +127,7 @@ export class LeeaAgent {
       sessionID: сontext.sessionId,
       parentID: сontext.requestId,
       agentID,
-      input,
+      input: JSON.stringify(input),
     })
 
     this.transport.sendMessage(request)
