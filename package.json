@@ -1,6 +1,6 @@
 {
   "name": "@leealabs/agent-js-sdk",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Buenos dias!",
   "main": "dist/index.js",
   "scripts": {
