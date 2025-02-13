@@ -25,8 +25,6 @@ export class LeeaAgent {
   private readonly apiClient = getApi(this.authStorage)
   private solanaConnection: Connection
   private solanaKey: Keypair
-  private name: string
-  private description: string
   private fee: BN
   private visibilityMap = {
     public: AgentHello_AgentVisibility.public,
@@ -44,8 +42,6 @@ export class LeeaAgent {
       'https://white-proud-spring.solana-devnet.quiknode.pro/ee36d91d834217295581cc043e15c0fb62089d28/',
       'confirmed'
     )
-    this.name = initData.name
-    this.description = initData.description
     this.fee = new anchor.BN(initData.fee)
     await this.registerAgent()
     this.authStorage.set(initData.apiToken)
@@ -93,7 +89,7 @@ export class LeeaAgent {
       console.log(`Agent already registered at leea program: ${agentData.agentName}`)
     } catch (err) {
       await program.methods
-        .registerAgent("Leea_ai_agent", "ai_agent", this.fee)
+        .registerAgent('Leea_ai_agent', 'ai_agent', this.fee)
         .accounts({
           holder: this.solanaKey.publicKey,
         })
