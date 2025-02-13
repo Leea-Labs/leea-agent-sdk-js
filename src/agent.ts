@@ -2,7 +2,7 @@ import {AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest} 
 import {WebSocketClient} from './transport/sockets'
 import {ExecutionContext, InitData} from './types/init'
 import zodToJson from 'zod-to-json-schema'
-import {clusterApiUrl, Connection, Keypair} from '@solana/web3.js'
+import {Connection, Keypair} from '@solana/web3.js'
 import nacl from 'tweetnacl'
 import {decodeUTF8} from 'tweetnacl-util'
 import bs58 from 'bs58'
