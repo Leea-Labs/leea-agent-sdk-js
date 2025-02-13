@@ -83,7 +83,6 @@ export class LeeaAgent {
       })
       return signature
     }
-
     // Check if already registered
     const [agent] = anchor.web3.PublicKey.findProgramAddressSync(
       [Buffer.from('leea_agent'), this.solanaKey.publicKey.toBuffer()],
@@ -94,7 +93,7 @@ export class LeeaAgent {
       console.log(`Agent already registered at leea program: ${agentData.agentName}`)
     } catch (err) {
       await program.methods
-        .registerAgent(this.name, this.description, this.fee)
+        .registerAgent("Leea_ai_agent", "ai_agent", this.fee)
         .accounts({
           holder: this.solanaKey.publicKey,
         })
