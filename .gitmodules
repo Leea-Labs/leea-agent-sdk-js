@@ -2,5 +2,5 @@
 	path = leea-agent-protocol
 	url = git@github.com:Leea-Labs/leea-agent-protocol.git
 [submodule "leea-contracts"]
-	path = leea-contracts
+	path = src/leea-contracts
 	url = https://github.com/Leea-Labs/leea-contracts.git
