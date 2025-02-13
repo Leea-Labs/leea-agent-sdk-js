@@ -1,2 +1,2 @@
 export {LeeaAgent} from './agent'
-export {RequestHandler, InitData} from './types/init'
+export {RequestHandler, InitData, ExecutionContext} from './types/init'
