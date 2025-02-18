@@ -1,7 +1,7 @@
 import {type Schema} from 'zod'
 import {Agent} from './agent'
 
-export type RequestHandler = (data: any, ctx: ContextFns) => string | Promise<string>
+export type RequestHandler = (data: any, fns: ContextFns, ctx: ExecutionContext) => string | Promise<string>
 
 type ContextFns = {
   getAgent: (fullname: string) => Promise<Agent>

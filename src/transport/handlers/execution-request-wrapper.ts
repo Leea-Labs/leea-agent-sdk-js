@@ -1,6 +1,6 @@
 import {LeeaAgent} from '../../agent'
 import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
-import {RequestHandler} from '../../types/init'
+import {ExecutionContext, RequestHandler} from '../../types/init'
 
 export const executionRequestWrapper = async (
   request: ExecutionRequest,
@@ -8,7 +8,7 @@ export const executionRequestWrapper = async (
   callback: RequestHandler,
   agent: LeeaAgent
 ) => {
-  const context = {
+  const context: ExecutionContext = {
     requestId: request.requestID,
     parentId: request.parentID,
     sessionId: request.sessionID,
@@ -16,12 +16,16 @@ export const executionRequestWrapper = async (
 
   const data = typeof request.input === 'string' ? JSON.parse(request.input) : request.input
 
-  const result = await callback(data, {
-    callAgent: (agentID: string, input: string) => agent.callAgent(agentID, input, context),
-    getAgent: agent.getAgent,
-    getAgentsList: agent.getAgentsList,
-    log: (message) => agent.log(message, context.requestId),
-  })
+  const result = await callback(
+    data,
+    {
+      callAgent: (agentID: string, input: string) => agent.callAgent(agentID, input, context),
+      getAgent: agent.getAgent,
+      getAgentsList: agent.getAgentsList,
+      log: (message) => agent.log(message, context.requestId),
+    },
+    context
+  )
 
   send(
     ExecutionResult.create({
