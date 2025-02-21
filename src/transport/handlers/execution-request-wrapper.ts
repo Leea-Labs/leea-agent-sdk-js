@@ -2,6 +2,14 @@ import {LeeaAgent} from '../../agent'
 import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
 import {RequestHandler} from '../../types/init'
 
+const parseInput = (input) => {
+  try {
+    return typeof input === 'string' ? JSON.parse(input) : input
+  } catch {
+    return input
+  }
+}
+
 export const executionRequestWrapper = async (
   request: ExecutionRequest,
   send: (message: ExecutionResult) => void,
@@ -14,7 +22,7 @@ export const executionRequestWrapper = async (
     sessionId: request.sessionID,
   }
 
-  const data = typeof request.input === 'string' ? JSON.parse(request.input) : request.input
+  const data = parseInput(request.input)
 
   const result = await callback(data, {
     callAgent: (agentID: string, input: string) => agent.callAgent(agentID, input, context),
