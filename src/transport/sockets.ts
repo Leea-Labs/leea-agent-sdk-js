@@ -1,4 +1,4 @@
-import {WebSocket} from 'ws'
+import WebSocket from 'ws'
 import {protocolService} from '../services/protocol.service'
 import {AgentHello} from '../protocol/protocol'
 import {routes} from './handlers/routes'

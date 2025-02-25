@@ -14,7 +14,13 @@ export const executionRequestWrapper = async (
     sessionId: request.sessionID,
   }
 
-  const data = typeof request.input === 'string' ? JSON.parse(request.input) : request.input
+  let data
+
+  try {
+    data = JSON.parse(request.input)
+  } catch {
+    data = request.input
+  }
 
   const result = await callback(
     data,
