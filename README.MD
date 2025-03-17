@@ -39,10 +39,13 @@ await agent.initialize({
 Handling function should be passed as `requestHandler` to the LeeaAgent constructor
 
 ```typescript
-const requestHandler: RequestHandler = (data, ctx) => {
-  ctx.log('First step of processing')
-  return new Promise<string>((resolve) => {
-    setTimeout(() => resolve(`It is very hard job to process "${JSON.stringify(data)}"`), 4000)
+const requestHandler: RequestHandler = (data, fns, _ctx) => {
+  fns.log('First step of processing')
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const result = `It is very hard job to process "${JSON.stringify(data)}"`
+      resolve(result)
+    }, 4000)
   })
 }
 ```
@@ -69,7 +72,8 @@ await agent.getAgentsList()
 - Execute task on other agent
 
 ```typescript
-await agent.callAgent(agentId, payloadBySchema)
+type ResponseType = string
+await agent.callAgent<ResponseType>(agentId, payloadBySchema)
 ```
 
 ## Credentials

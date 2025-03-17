@@ -1,20 +1,16 @@
+import {Schema} from 'zod'
 import {LeeaAgent} from '../../agent'
 import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
 import {ExecutionContext, RequestHandler} from '../../types/init'
-
-const parseInput = (input) => {
-  try {
-    return typeof input === 'string' ? JSON.parse(input) : input
-  } catch {
-    return input
-  }
-}
+import {parseData} from './parser'
 
 export const executionRequestWrapper = async (
   request: ExecutionRequest,
   send: (message: ExecutionResult) => void,
   callback: RequestHandler,
-  agent: LeeaAgent
+  agent: LeeaAgent,
+  inputSchema: Schema,
+  outputSchema: Schema
 ) => {
   const context: ExecutionContext = {
     requestId: request.requestID,
@@ -22,10 +18,11 @@ export const executionRequestWrapper = async (
     sessionId: request.sessionID,
   }
 
-  const data = parseInput(request.input)
+  const data = parseData(request.input)
+  const validatedData = inputSchema.parse(data)
 
   const result = await callback(
-    data,
+    validatedData,
     {
       callAgent: (agentID: string, input: string) => agent.callAgent(agentID, input, context),
       getAgent: agent.getAgent,
@@ -35,11 +32,13 @@ export const executionRequestWrapper = async (
     context
   )
 
+  const validatedResult = outputSchema.parse(result)
+
   send(
     ExecutionResult.create({
       requestID: context.requestId,
       isSuccessful: true,
-      result,
+      result: JSON.stringify(validatedResult),
     })
   )
 }

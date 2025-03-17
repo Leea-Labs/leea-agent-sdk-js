@@ -1,3 +1,4 @@
+import {Schema} from 'zod'
 import type {LeeaAgent} from '../../agent'
 import {Envelope_MessageType as MsgType, Envelope_MessageType} from '../../protocol/protocol'
 import {AuthAwait} from '../../types/auth'
@@ -19,6 +20,12 @@ export const routes: Routes = {
   [MsgType.ExecutionResult]: executionResultHandler,
 }
 
-export const assignHandler = (agent: LeeaAgent, requestHandler: RequestHandler) => {
-  routes[MsgType.ExecutionRequest] = (msg, send) => executionRequestWrapper(msg, send, requestHandler, agent)
+export const assignHandler = (
+  agent: LeeaAgent,
+  requestHandler: RequestHandler,
+  inputSchema: Schema,
+  outputSchema: Schema
+) => {
+  routes[MsgType.ExecutionRequest] = (msg, send) =>
+    executionRequestWrapper(msg, send, requestHandler, agent, inputSchema, outputSchema)
 }

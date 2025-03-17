@@ -18,6 +18,7 @@ import * as anchor from '@coral-xyz/anchor'
 import {Program, BN} from '@coral-xyz/anchor'
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet'
 import {imageReader} from './services/image-reader'
+import {Schema} from 'zod'
 
 export class LeeaAgent {
   private transport: WebSocketClient
@@ -30,6 +31,7 @@ export class LeeaAgent {
     public: AgentHello_AgentVisibility.public,
     private: AgentHello_AgentVisibility.private,
   }
+  private inputSchema: Schema
 
   async initialize(initData: InitData) {
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
@@ -43,10 +45,11 @@ export class LeeaAgent {
       'confirmed'
     )
     this.fee = new anchor.BN(initData.fee)
+    this.inputSchema = initData.inputSchema
     await this.registerAgent()
     this.authStorage.set(initData.apiToken)
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
-    assignHandler(this, initData.requestHandler)
+    assignHandler(this, initData.requestHandler, initData.inputSchema, initData.outputSchema)
   }
 
   private buildHello(initData: InitData): AgentHello {
@@ -116,13 +119,15 @@ export class LeeaAgent {
     })
   }
 
-  callAgent<T = any>(agentID: string, input: T, сontext?: ExecutionContext) {
+  callAgent<TResponse = any>(agentID: string, input: any, сontext?: ExecutionContext): Promise<TResponse> {
+    const validatedInput = this.inputSchema.parse(input)
+
     const request = ExecutionRequest.create({
       requestID: uuid(),
       sessionID: сontext?.sessionId,
       parentID: сontext?.requestId,
       agentID,
-      input: JSON.stringify(input),
+      input: JSON.stringify(validatedInput),
     })
 
     this.transport.sendMessage(request)

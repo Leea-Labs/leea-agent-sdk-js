@@ -1,12 +1,12 @@
 import {type Schema} from 'zod'
 import {Agent} from './agent'
 
-export type RequestHandler = (data: any, fns: ContextFns, ctx: ExecutionContext) => string | Promise<string>
+export type RequestHandler = (data: any, fns: ContextFns, ctx: ExecutionContext) => any | Promise<any>
 
-type ContextFns = {
+export type ContextFns = {
+  callAgent: (agentID: string, input: any) => Promise<any>
   getAgent: (fullname: string) => Promise<Agent>
   getAgentsList: () => Promise<Agent[]>
-  callAgent: (agentID: string, input: any) => Promise<string>
   log: (message: string) => void
 }
 

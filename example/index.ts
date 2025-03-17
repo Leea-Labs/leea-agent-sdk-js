@@ -1,10 +1,13 @@
 import {z} from 'zod'
 import {LeeaAgent, RequestHandler} from '../src/'
 
-const requestHandler: RequestHandler = (data, ctx) => {
-  ctx.log('First step of processing')
-  return new Promise<string>((resolve) => {
-    setTimeout(() => resolve(`It is very hard job to process "${JSON.stringify(data)}"`), 4000)
+const requestHandler: RequestHandler = (data, fns, _ctx) => {
+  fns.log('First step of processing')
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const result = `It is very hard job to process "${JSON.stringify(data)}"`
+      resolve(result)
+    }, 4000)
   })
 }
 
@@ -35,7 +38,7 @@ export const main = async () => {
     summarizer: 'Define what is trending and predict future. Create post for X',
   }
 
-  const response = await agent.callAgent(someA.id, payload)
+  const response = await agent.callAgent<string>(someA.id, payload)
   console.log("That's what I needed! Result:", response)
 }
 
