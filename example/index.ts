@@ -1,4 +1,3 @@
-import {z} from 'zod'
 import {LeeaAgent, RequestHandler} from '../src/'
 
 const requestHandler: RequestHandler = (data, fns, _ctx) => {
@@ -17,8 +16,16 @@ export const main = async () => {
     name: 'example_name',
     fee: 100,
     description: 'example_desc',
-    inputSchema: z.string(),
-    outputSchema: z.string(),
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hola: {type: 'integer'},
+        adios: {type: 'string'},
+      },
+      required: ['hola', 'adios'],
+      additionalProperties: false,
+    },
+    outputSchema: {type: 'string'},
     secretPath: './example/id.json',
     apiToken: '391320f6-8584-4655-a0f7-3d64545b0721',
     requestHandler,
@@ -38,8 +45,10 @@ export const main = async () => {
     summarizer: 'Define what is trending and predict future. Create post for X',
   }
 
-  const response = await agent.callAgent<string>(someA.id, payload)
-  console.log("That's what I needed! Result:", response)
+  if (someA) {
+    const response = await agent.callAgent<string>(someA, payload)
+    console.log("That's what I needed! Result:", response)
+  }
 }
 
 main()

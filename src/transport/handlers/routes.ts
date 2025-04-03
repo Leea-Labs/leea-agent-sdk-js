@@ -1,4 +1,4 @@
-import {Schema} from 'zod'
+import {Schema} from 'ajv'
 import type {LeeaAgent} from '../../agent'
 import {Envelope_MessageType as MsgType, Envelope_MessageType} from '../../protocol/protocol'
 import {AuthAwait} from '../../types/auth'

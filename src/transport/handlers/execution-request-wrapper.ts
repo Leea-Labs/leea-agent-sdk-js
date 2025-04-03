@@ -1,14 +1,16 @@
-import {Schema} from 'zod'
 import {LeeaAgent} from '../../agent'
 import {ExecutionRequest, ExecutionResult} from '../../protocol/protocol'
 import {ExecutionContext, RequestHandler} from '../../types/init'
 import {parseData} from './parser'
+import {Agent} from '../../types/agent'
+import {Schema} from 'ajv'
+import {ajv} from '../../services/validator'
 
 export const executionRequestWrapper = async (
   request: ExecutionRequest,
   send: (message: ExecutionResult) => void,
   callback: RequestHandler,
-  agent: LeeaAgent,
+  currentAgent: LeeaAgent,
   inputSchema: Schema,
   outputSchema: Schema
 ) => {
@@ -19,26 +21,35 @@ export const executionRequestWrapper = async (
   }
 
   const data = parseData(request.input)
-  const validatedData = inputSchema.parse(data)
+  const inputIsValid = ajv.compile(inputSchema)(data)
+  if (!inputIsValid) {
+    send(
+      ExecutionResult.create({
+        requestID: context.requestId,
+        isSuccessful: false,
+      })
+    )
+    return
+  }
 
   const result = await callback(
-    validatedData,
+    data,
     {
-      callAgent: (agentID: string, input: string) => agent.callAgent(agentID, input, context),
-      getAgent: agent.getAgent,
-      getAgentsList: agent.getAgentsList,
-      log: (message) => agent.log(message, context.requestId),
+      callAgent: (agent: Agent, input: string) => currentAgent.callAgent(agent, input, context),
+      getAgent: currentAgent.getAgent,
+      getAgentsList: currentAgent.getAgentsList,
+      log: (message) => currentAgent.log(message, context.requestId),
     },
     context
   )
 
-  const validatedResult = outputSchema.parse(result)
+  const outputIsValid = ajv.compile(outputSchema)(result)
 
   send(
     ExecutionResult.create({
       requestID: context.requestId,
-      isSuccessful: true,
-      result: JSON.stringify(validatedResult),
+      isSuccessful: outputIsValid,
+      result: JSON.stringify(result),
     })
   )
 }

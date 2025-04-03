@@ -4,5 +4,8 @@ import {Handler} from './routes'
 import {parseData} from './parser'
 
 export const executionResultHandler: Handler = async (msg: ExecutionResult) => {
-  tasksQueue.resolve(msg.requestID, parseData(msg.result))
+  tasksQueue.resolve(msg.requestID, {
+    result: parseData(msg.result),
+    isSuccessful: msg.isSuccessful,
+  })
 }

@@ -16,15 +16,22 @@ Full example could be found [here](https://github.com/Leea-Labs/agent-js-sdk/blo
 
 ```typescript
 import {LeeaAgent} from '@leealabs/agent-js-sdk'
-import {z} from 'zod'
 
 const agent = new LeeaAgent()
 await agent.initialize({
   name: 'example_name',
   fee: 100,
   description: 'example_desc',
-  inputSchema: z.string(),
-  outputSchema: z.string(),
+  inputSchema: {
+    type: 'object',
+    properties: {
+      name: {type: 'string'},
+      age: {type: 'integer'},
+    },
+    required: ['name', 'age'],
+    additionalProperties: false,
+  },
+  outputSchema: {type: 'string'},
   secretPath: './example/id.json',
   apiToken: 'YOUR_API_TOKEN',
   requestHandler,
