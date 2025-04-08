@@ -11,8 +11,8 @@ import {v4 as uuid} from 'uuid'
 import {assignHandler} from './transport/handlers/routes'
 import {tasksQueue} from './services/tasks-queue'
 import path from 'path'
-import type {LeeaAgentRegistry} from './leea-contracts/contracts/solana/target/types/leea_agent_registry'
-import idl from './leea-contracts/contracts/solana/target/idl/leea_agent_registry.json'
+import type {Registry} from './leea-contracts/contracts/solana/target/types/registry'
+import idl from './leea-contracts/contracts/solana/target/idl/registry.json'
 import * as anchor from '@coral-xyz/anchor'
 import {Program, BN} from '@coral-xyz/anchor'
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet'
@@ -71,7 +71,7 @@ export class LeeaAgent {
       commitment: 'processed',
     })
     anchor.setProvider(provider)
-    const program = new Program(idl as LeeaAgentRegistry, provider)
+    const program = new Program(idl as Registry, provider)
     const confirm = async (signature: string): Promise<string> => {
       const block = await connection.getLatestBlockhash()
       await connection.confirmTransaction({
