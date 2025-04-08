@@ -1,7 +1,6 @@
 import {AgentHello, AgentHello_AgentVisibility, ExecutionLog, ExecutionRequest} from './protocol/protocol'
 import {WebSocketClient} from './transport/sockets'
 import {ExecutionContext, InitData} from './types/init'
-import zodToJson from 'zod-to-json-schema'
 import {Connection, Keypair} from '@solana/web3.js'
 import nacl from 'tweetnacl'
 import {decodeUTF8} from 'tweetnacl-util'
@@ -18,6 +17,8 @@ import * as anchor from '@coral-xyz/anchor'
 import {Program, BN} from '@coral-xyz/anchor'
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet'
 import {imageReader} from './services/image-reader'
+import {ajv} from './services/validator'
+import {Agent, AgentCallResult} from './types/agent'
 
 export class LeeaAgent {
   private transport: WebSocketClient
@@ -46,15 +47,15 @@ export class LeeaAgent {
     await this.registerAgent()
     this.authStorage.set(initData.apiToken)
     this.transport = new WebSocketClient(initData.apiToken, this.buildHello(initData))
-    assignHandler(this, initData.requestHandler)
+    assignHandler(this, initData.requestHandler, initData.inputSchema, initData.outputSchema)
   }
 
   private buildHello(initData: InitData): AgentHello {
     return {
       name: initData.name,
       description: initData.description,
-      inputSchema: JSON.stringify(zodToJson(initData.inputSchema), null, 2),
-      outputSchema: JSON.stringify(zodToJson(initData.outputSchema), null, 2),
+      inputSchema: JSON.stringify(initData.inputSchema, null, 2),
+      outputSchema: JSON.stringify(initData.outputSchema, null, 2),
       publicKey: this.solanaKey.publicKey.toBase58(),
       signature: bs58.encode(nacl.sign.detached(decodeUTF8(initData.name), this.solanaKey.secretKey)),
       visibility: initData.visibility ? this.visibilityMap[initData.visibility] : AgentHello_AgentVisibility.public,
@@ -116,17 +117,22 @@ export class LeeaAgent {
     })
   }
 
-  callAgent<T = any>(agentID: string, input: T, сontext?: ExecutionContext) {
+  callAgent<TResponse>(agent: Agent, input: any, сontext?: ExecutionContext): Promise<AgentCallResult<TResponse>> {
+    const isVaild = ajv.compile(agent.input_schema)(input)
+    if (!isVaild) {
+      throw new Error(`Invalid input given for agent ${agent.name}`)
+    }
+
     const request = ExecutionRequest.create({
       requestID: uuid(),
       sessionID: сontext?.sessionId,
       parentID: сontext?.requestId,
-      agentID,
+      agentID: agent.id,
       input: JSON.stringify(input),
     })
 
     this.transport.sendMessage(request)
-    return tasksQueue.add(request.requestID)
+    return tasksQueue.add(request.requestID, agent.output_schema)
   }
 
   log(message: string, requestId: string) {

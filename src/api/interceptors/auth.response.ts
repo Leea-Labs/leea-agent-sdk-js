@@ -13,7 +13,7 @@ class AuthResponseInterceptor {
 
   private onRejected = async (error: AxiosError) => {
     if (error.response?.status === 404) {
-      return Promise.resolve(error)
+      return Promise.resolve(error.response)
     }
   }
 }

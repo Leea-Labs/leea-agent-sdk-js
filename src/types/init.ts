@@ -1,12 +1,12 @@
-import {type Schema} from 'zod'
 import {Agent} from './agent'
+import {Schema} from 'ajv'
 
-export type RequestHandler = (data: any, fns: ContextFns, ctx: ExecutionContext) => string | Promise<string>
+export type RequestHandler = (data: any, fns: ContextFns, ctx: ExecutionContext) => any | Promise<any>
 
-type ContextFns = {
-  getAgent: (fullname: string) => Promise<Agent>
+export type ContextFns = {
+  callAgent: (agent: Agent, input: any) => Promise<any>
+  getAgent: (fullname: string) => Promise<Agent | null>
   getAgentsList: () => Promise<Agent[]>
-  callAgent: (agentID: string, input: any) => Promise<string>
   log: (message: string) => void
 }
 
