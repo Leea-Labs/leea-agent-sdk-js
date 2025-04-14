@@ -32,12 +32,22 @@ export class LeeaAgent {
     private: AgentHello_AgentVisibility.private,
   }
 
-  async initialize(initData: InitData) {
+  private getSecret(initData: InitData): Uint8Array {
+    if (initData.secretBase58) {
+      return bs58.decode(initData.secretBase58)
+    }
+
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
     const secret = require(fullPath)
     if (!secret) {
       throw new Error(`No secret found at ${fullPath}`)
     }
+
+    return secret
+  }
+
+  async initialize(initData: InitData) {
+    const secret = this.getSecret(initData)
     this.solanaKey = Keypair.fromSecretKey(new Uint8Array(secret))
     this.solanaConnection = new Connection(
       'https://white-proud-spring.solana-devnet.quiknode.pro/ee36d91d834217295581cc043e15c0fb62089d28/',

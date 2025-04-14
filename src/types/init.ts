@@ -23,7 +23,8 @@ export type InitData = {
   inputSchema: Schema
   outputSchema: Schema
   apiToken: string
-  secretPath: string
+  secretPath?: string
+  secretBase58?: string
   requestHandler: RequestHandler
   displayName: string
   visibility?: 'public' | 'private'

@@ -32,7 +32,8 @@ await agent.initialize({
     additionalProperties: false,
   },
   outputSchema: {type: 'string'},
-  secretPath: './example/id.json',
+  secretBase58: 'K8aWXBwmoBx', // optional, if secretPath is set
+  secretPath: './example/id.json', // optional, if secretBase58 is set
   apiToken: 'YOUR_API_TOKEN',
   requestHandler,
   visibility: 'private', // optional, default is 'public'
