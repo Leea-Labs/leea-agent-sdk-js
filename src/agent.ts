@@ -37,6 +37,10 @@ export class LeeaAgent {
       return bs58.decode(initData.secretBase58)
     }
 
+    if (!initData.secretPath) {
+      throw new Error('No private key provided. Should be set via secretBase58 or secretPath')
+    }
+
     const fullPath = path.resolve(process.cwd(), initData.secretPath)
     const secret = require(fullPath)
     if (!secret) {
