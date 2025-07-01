@@ -3,6 +3,7 @@ import {Schema} from 'ajv'
 export type Agent = {
   id: string
   name: string
+  display_name: string
   description: string
   input_schema: Schema
   output_schema: Schema

@@ -29,4 +29,5 @@ export type InitData = {
   displayName: string
   visibility?: 'public' | 'private'
   avatarPath?: string
+  solanaRpcEndpoint: string
 }

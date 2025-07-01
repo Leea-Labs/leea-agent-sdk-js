@@ -39,6 +39,7 @@ await agent.initialize({
   visibility: 'private', // optional, default is 'public'
   displayName: 'Super agent',
   avatarPath: './example/leea.png',
+  solanaRpcEndpoint: 'https://solana-rpc.endpoint'
 })
 ```
 
@@ -92,4 +93,4 @@ Could be found on dashboard: https://dashboard.leealabs.com
 
 ### Wallet secret
 
-Should be stored as bytes array and passed via `secretPath` parameter
+Should be stored as bytes array and passed via `secretPath` parameter. Should have a minimal amount of SOL to register on chain

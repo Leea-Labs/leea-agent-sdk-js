@@ -53,10 +53,7 @@ export class LeeaAgent {
   async initialize(initData: InitData) {
     const secret = this.getSecret(initData)
     this.solanaKey = Keypair.fromSecretKey(new Uint8Array(secret))
-    this.solanaConnection = new Connection(
-      'https://white-proud-spring.solana-devnet.quiknode.pro/ee36d91d834217295581cc043e15c0fb62089d28/',
-      'confirmed'
-    )
+    this.solanaConnection = new Connection(initData.solanaRpcEndpoint, 'confirmed')
     this.fee = new anchor.BN(initData.fee)
     await this.registerAgent()
     this.authStorage.set(initData.apiToken)
